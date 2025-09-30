@@ -5,6 +5,8 @@
 *.settings
 /.settings/
 *.lauch
+*.mxproject
+*.cproject
 
 #metadata
 .metadata/
