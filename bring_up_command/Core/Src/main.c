@@ -131,7 +131,7 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-  uint8_t byte;
+  uint16_t num_byte;
   uint16_t line_pos = 0;
   uint32_t update_freq = 0;
   /* USER CODE END Init */
@@ -177,27 +177,17 @@ int main(void)
 	    /* USER CODE BEGIN 3 */
 	  update_freq++;
 	  if(update_freq == 500000){
-		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		  if(RingBufferPop(&ring_buf, &byte)){
-			  //HAL_UART_Transmit(&huart2, &byte, 1, HAL_MAX_DELAY);
-			  if (byte == '\r' || byte == '\n') {
-			    // Fim de linha detectado
-			    if (line_pos > 0) {
-			      cmd_buf[line_pos] = '\0'; // Finaliza a string
-			      command_parser_process(cmd_buf); // Processa o comando
-			      line_pos = 0; // Reseta para a próxima linha
-			      prinTX("\r\n> "); // Prompt
-			    }
-			  }
-		  } else if (byte == '\b' || byte == 127) { // Backspace
-	            if (line_pos > 0) {
-	                line_pos--;
-	            }
-	        } else if (line_pos < (CMD_BUF_SIZE - 1)) {
-	            // Adiciona caractere ao buffer de linha
-	            cmd_buf[line_pos++] = byte;
-	        }
-		 update_freq = 0;
+	    //HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+	    if(RingBufferIsEmpty(&ring_buf) != kEmpty){
+	      RingBufferCurrentSize(&ring_buf, &num_byte);
+	      RingBufferStreamPop(&ring_buf, cmd_buf, num_byte);
+	      HAL_UART_Transmit(&huart2, cmd_buf, num_byte, HAL_MAX_DELAY);
+//	      for(uint8_t i = 0; i <= num_byte; i++){
+//	      	HAL_UART_Transmit(&huart2, &cmd_buf[i], num_byte, HAL_MAX_DELAY);
+//	      }
+	      command_parser_process(cmd_buf); // Processa o comando
+	    }
+	    update_freq = 0;
 	  }
 
   }

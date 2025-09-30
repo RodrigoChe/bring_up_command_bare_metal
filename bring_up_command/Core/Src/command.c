@@ -70,7 +70,7 @@ void command_parser_process(char *command_string) {
     if (strlen(command_string) == 0) {
         return;
     }
-
+    uint16_t sizeOfcmd = strlen(command_string);
     for (int i = 0; i < num_commands; i++) {
         if (strcmp(command_string, commands[i].name) == 0) {
             commands[i].action(); // Encontrou o comando, executa a função associada
