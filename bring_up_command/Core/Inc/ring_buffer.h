@@ -20,7 +20,7 @@ extern "C" {
  * @details We account for the space we can't use for thread safety. The buffer can
  * actually hold RING_BUFFER_SIZE - 1 elements to distinguish between full and empty states.
  */
-#define RING_BUFFER_SIZE 4
+#define RING_BUFFER_SIZE 128
 
 /**
  * @brief Circular ring buffer structure.
