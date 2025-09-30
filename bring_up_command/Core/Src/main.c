@@ -21,7 +21,8 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "ring_buffer.h"
+#include "string.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -58,7 +59,49 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+#define RX_DMA_BUF_SIZE 128
+uint8_t rx_dma_buf[RX_DMA_BUF_SIZE];
+RingBuffer ring_buf;
 
+/**
+  * @brief  UART receive event callback.
+  * This function is called by HAL when data is received via DMA
+  * @param  huart UART handle.
+  * @param  Size  Number of data received.
+  * @retval None
+  */
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t dma_pos)
+{
+    static uint16_t last_pos = 0;
+    uint16_t i;
+
+    if (huart->Instance == USART2) {
+    	// Store the previous DMA read position across multiple calls.
+        uint16_t start_pos = last_pos;
+
+        // If the new DMA position (Size) is smaller than the previous one,
+        // it means the circular DMA buffer has wrapped around.
+        // Size is DMA position
+        if (dma_pos < last_pos) {
+        	// Copy data from the old (last) position up to the end of the DMA buffer.
+            for (i = start_pos; i < RX_DMA_BUF_SIZE; i++) {
+                RingBufferPush(&ring_buf, rx_dma_buf[i]);
+            }
+            // After wrap, continue copying from the beginning of the DMA buffer.
+            start_pos = 0;
+        }
+
+        // Copy the newly received data between start_pos and the current DMA position.
+        for (i = start_pos; i < dma_pos; i++) {
+        	RingBufferPush(&ring_buf, rx_dma_buf[i]);
+
+        }
+
+        // Update previous position for the next callback.
+        last_pos = dma_pos;
+    }
+}
 /* USER CODE END 0 */
 
 /**
@@ -93,7 +136,21 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
+  const uint8_t msg[] =
+		  "Ring Buffer using UART RX in circular mode \r\n";
+  /*Commum mode for  TX*/
+  HAL_UART_Transmit(&huart2, msg, sizeof(msg), HAL_MAX_DELAY);
 
+  ReturnCodes ret = kError;
+
+  ret = RingBufferInit(&ring_buf);
+
+  if(ret == kOk) {
+	  strcpy((char *)msg, "Buffer initialized!\r\n");
+	  HAL_UART_Transmit(&huart2, msg, sizeof(msg), HAL_MAX_DELAY);
+  }
+
+  HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_dma_buf, RX_DMA_BUF_SIZE);
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -101,7 +158,19 @@ int main(void)
   while (1)
   {
     /* USER CODE END WHILE */
+	    /* USER CODE BEGIN 3 */
 
+		  uint8_t buffer_rec[3] = {0};
+
+		  if(RingBufferIsFull(&ring_buf) == kFull) {
+			  RingBufferStreamPop(&ring_buf, buffer_rec, 3);
+			  for(uint8_t i = 0; i <= (sizeof(buffer_rec)/sizeof(buffer_rec[0])); i++){
+				  HAL_UART_Transmit(&huart2, &buffer_rec[i], sizeof(uint8_t), HAL_MAX_DELAY);
+			  }
+		  }
+
+		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
+		  HAL_Delay(500);
     /* USER CODE BEGIN 3 */
   }
   /* USER CODE END 3 */
