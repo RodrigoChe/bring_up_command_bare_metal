@@ -9,7 +9,6 @@
 #include <string.h>
 #include <stdbool.h>
 
-//TODO: Checks for valid pointers and data in functions
 ReturnCodes RingBufferInit(RingBuffer* rb) {
   if(rb == NULL) {
 	  /* check your buffer parameter */

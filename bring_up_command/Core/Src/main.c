@@ -22,6 +22,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "ring_buffer.h"
+#include "command.h"
 #include "string.h"
 /* USER CODE END Includes */
 
@@ -59,8 +60,13 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
+
 #define RX_DMA_BUF_SIZE 128
 uint8_t rx_dma_buf[RX_DMA_BUF_SIZE];
+
+#define CMD_BUF_SIZE 128
+char cmd_buf[CMD_BUF_SIZE];
+
 RingBuffer ring_buf;
 
 /**
@@ -102,6 +108,10 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t dma_pos)
         last_pos = dma_pos;
     }
 }
+
+static void prinTX(const char* str) {
+    HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
+}
 /* USER CODE END 0 */
 
 /**
@@ -121,7 +131,9 @@ int main(void)
   HAL_Init();
 
   /* USER CODE BEGIN Init */
-
+  uint8_t byte;
+  uint16_t line_pos = 0;
+  uint32_t update_freq = 0;
   /* USER CODE END Init */
 
   /* Configure the system clock */
@@ -136,21 +148,25 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  const uint8_t msg[] =
-		  "Ring Buffer using UART RX in circular mode \r\n";
+  const char* msg = "Firmware initialing\r\n";
   /*Commum mode for  TX*/
-  HAL_UART_Transmit(&huart2, msg, sizeof(msg), HAL_MAX_DELAY);
+  //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+  prinTX(msg);
 
   ReturnCodes ret = kError;
 
   ret = RingBufferInit(&ring_buf);
 
-  if(ret == kOk) {
-	  strcpy((char *)msg, "Buffer initialized!\r\n");
-	  HAL_UART_Transmit(&huart2, msg, sizeof(msg), HAL_MAX_DELAY);
+  if(ret != kOk) {
+	  msg = "Failed in buffers initialization!\r\n";
+      //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+	  prinTX(msg);
   }
 
+  prinTX("Test Console Initialized. \r\n Type 'help'.\r\n");
+
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_dma_buf, RX_DMA_BUF_SIZE);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -159,19 +175,31 @@ int main(void)
   {
     /* USER CODE END WHILE */
 	    /* USER CODE BEGIN 3 */
-
-		  uint8_t buffer_rec[3] = {0};
-
-		  if(RingBufferIsFull(&ring_buf) == kFull) {
-			  RingBufferStreamPop(&ring_buf, buffer_rec, 3);
-			  for(uint8_t i = 0; i <= (sizeof(buffer_rec)/sizeof(buffer_rec[0])); i++){
-				  HAL_UART_Transmit(&huart2, &buffer_rec[i], sizeof(uint8_t), HAL_MAX_DELAY);
-			  }
-		  }
-
+	  update_freq++;
+	  if(update_freq == 500000){
 		  HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
-		  HAL_Delay(500);
-    /* USER CODE BEGIN 3 */
+		  if(RingBufferPop(&ring_buf, &byte)){
+			  //HAL_UART_Transmit(&huart2, &byte, 1, HAL_MAX_DELAY);
+			  if (byte == '\r' || byte == '\n') {
+			    // Fim de linha detectado
+			    if (line_pos > 0) {
+			      cmd_buf[line_pos] = '\0'; // Finaliza a string
+			      command_parser_process(cmd_buf); // Processa o comando
+			      line_pos = 0; // Reseta para a próxima linha
+			      prinTX("\r\n> "); // Prompt
+			    }
+			  }
+		  } else if (byte == '\b' || byte == 127) { // Backspace
+	            if (line_pos > 0) {
+	                line_pos--;
+	            }
+	        } else if (line_pos < (CMD_BUF_SIZE - 1)) {
+	            // Adiciona caractere ao buffer de linha
+	            cmd_buf[line_pos++] = byte;
+	        }
+		 update_freq = 0;
+	  }
+
   }
   /* USER CODE END 3 */
 }
