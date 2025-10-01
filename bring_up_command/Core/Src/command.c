@@ -1,124 +1,108 @@
-/**
- * @file command.c
- * @brief Command parser implementation for Nucleo L073 board console.
- *
- * This module implements a simple command parser using the Command Pattern.
- * It provides user commands via UART to control the LED, print firmware version,
- * and display available commands.
- *
- * @date Sep 30, 2025
- * @author
- *   Rodrigo Che
- */
+// command.c
+// Created on: Sep 30, 2025
+// Author: Rodrigo Che
+//
+// Command parser implementation for UART console commands.
 
 #include "command.h"
-#include "main.h"       // For HAL_GPIO_WritePin, huart2, LD2_GPIO_Port, etc.
+#include "main.h"       // For HAL_GPIO_WritePin, etc.
 #include "fw_version.h"
-#include <string.h>
 #include <stdio.h>
+#include <string.h>
 
-/// Forward declarations of private command handler functions
-static void cmd_led_on(void);
-static void cmd_led_off(void);
-static void cmd_version(void);
-static void cmd_help(void);
+extern UART_HandleTypeDef huart2;  // Declared in main.c
 
-/// UART handle defined externally in main.c
-extern UART_HandleTypeDef huart2;
+// -----------------------------------------------------------------------------
+// Internal function prototypes
+// -----------------------------------------------------------------------------
+static void CmdLedOn();
+static void CmdLedOff();
+static void CmdVersion();
+static void CmdHelp();
+static void ConsolePrint(const char* str);
 
+// -----------------------------------------------------------------------------
+// Command table (acts as the "registry" for the command pattern)
+// -----------------------------------------------------------------------------
+static const Command kCommands[] = {
+    {"led-on",   CmdLedOn,   "Turn on the user LED (LD2)."},
+    {"led-off",  CmdLedOff,  "Turn off the user LED (LD2)."},
+    {"version",  CmdVersion, "Show firmware version."},
+    {"help",     CmdHelp,    "Show this help message."}
+};
+
+static const int kNumCommands = sizeof(kCommands) / sizeof(kCommands[0]);
+
+// -----------------------------------------------------------------------------
+// Internal helper functions
+// -----------------------------------------------------------------------------
 /**
- * @brief Helper function to send strings to the console over UART.
+ * @brief Sends a string over UART (blocking).
  *
- * @param str Null-terminated string to be transmitted.
+ * @param str Null-terminated string to send.
  */
-static void console_print(const char* str) {
+static void ConsolePrint(const char* str) {
   HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 
 /**
- * @brief Table of supported console commands.
- *
- * Each entry contains the command string, the handler function,
- * and a short help text.
+ * @brief Command: Turn LED on.
  */
-static const Command kCommands[] = {
-    {"led-on",  cmd_led_on,  "Turn on user LED (LD2)."},
-    {"led-off", cmd_led_off, "Turn off user LED (LD2)."},
-    {"version", cmd_version, "Show firmware version."},
-    {"help",    cmd_help,    "Show this help message."}
-};
-
-/// Number of registered commands in the table
-static const int kNumCommands = sizeof(kCommands) / sizeof(kCommands[0]);
-
-// -----------------------------------------------------------------------------
-// Command Handler Implementations
-// -----------------------------------------------------------------------------
-
-/**
- * @brief Turns the user LED (LD2) on.
- */
-static void cmd_led_on(void) {
+static void CmdLedOn() {
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_SET);
-  console_print("LED ON\r\n");
+  ConsolePrint("LED ON\r\n");
 }
 
 /**
- * @brief Turns the user LED (LD2) off.
+ * @brief Command: Turn LED off.
  */
-static void cmd_led_off(void) {
+static void CmdLedOff() {
   HAL_GPIO_WritePin(LD2_GPIO_Port, LD2_Pin, GPIO_PIN_RESET);
-  console_print("LED OFF\r\n");
+  ConsolePrint("LED OFF\r\n");
 }
 
 /**
- * @brief Prints the firmware version to the console.
+ * @brief Command: Show firmware version.
  */
-static void cmd_version(void) {
+static void CmdVersion() {
   char buffer[32];
   snprintf(buffer, sizeof(buffer), "Firmware v%s\r\n", FW_VERSION);
-  console_print(buffer);
+  ConsolePrint(buffer);
 }
 
 /**
- * @brief Prints a list of all available commands.
+ * @brief Command: Show list of available commands.
  */
-static void cmd_help(void) {
-  console_print("--- Available Commands ---\r\n");
-  for (int i = 0; i < kNumCommands; i++) {
+static void CmdHelp() {
+  ConsolePrint("--- Available Commands ---\r\n");
+  for (int i = 0; i < kNumCommands; ++i) {
     char buffer[128];
     snprintf(buffer, sizeof(buffer), "%-10s: %s\r\n",
              kCommands[i].name, kCommands[i].help_text);
-    console_print(buffer);
+    ConsolePrint(buffer);
   }
-  console_print("---------------------------\r\n");
+  ConsolePrint("---------------------------\r\n");
 }
 
 // -----------------------------------------------------------------------------
-// Command Parser
+// Public function implementation
 // -----------------------------------------------------------------------------
-
 /**
- * @brief Processes a command string entered by the user.
+ * @brief Parses a command string and executes the associated action.
  *
- * This function compares the given command string against
- * the registered command table and executes the corresponding action.
- *
- * @param command_string Null-terminated string containing the command.
+ * @param command_string Null-terminated string with command input.
  */
-void command_parser_process(const uint8_t* command_string) {
+void CommandParserProcess(const uint8_t* command_string) {
   if (strlen((const char*)command_string) == 0) {
     return;
   }
 
-  for (int i = 0; i < kNumCommands; i++) {
+  for (int i = 0; i < kNumCommands; ++i) {
     if (strcmp((const char*)command_string, kCommands[i].name) == 0) {
-      kCommands[i].action();  ///< Execute associated command handler
+      kCommands[i].action();  // Execute associated function
       return;
     }
   }
 
-  console_print("Command not recognized. Type 'help' to see the list.\r\n");
+  ConsolePrint("Unrecognized command. Type 'help' for a list.\r\n");
 }
-
-/*** end of file ***/

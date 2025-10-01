@@ -10,19 +10,19 @@
  *   Rodrigo Che
  */
 
-#ifndef COMMAND_PARSER_H_
-#define COMMAND_PARSER_H_
+#ifndef SRC_COMMAND_PARSER_H_
+#define SRC_COMMAND_PARSER_H_
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-#include <stdint.h>
+#include "stdint.h"
 
 /**
  * @brief Function pointer type for command execution callbacks.
  */
-typedef void (*ExecuteCommand)(void);
+typedef void (*ExecuteCommand)();
 
 /**
  * @struct Command
@@ -32,23 +32,23 @@ typedef void (*ExecuteCommand)(void);
  * and a short help text that describes its purpose.
  */
 typedef struct {
-  const char* name;            ///< Command string typed by the user
-  ExecuteCommand action;       ///< Function to execute when the command is called
-  const char* help_text;       ///< Short description of the command
+  const char* name;          ///< Command string typed by the user
+  ExecuteCommand action;     ///< Function executed when the command is matched
+  const char* help_text;     ///< Short description of the command
 } Command;
 
 /**
- * @brief Processes a command string and executes the corresponding command.
+ * @brief Parses and executes a command string.
  *
  * This function compares the given string against all registered
  * commands and, if a match is found, executes the associated action.
  *
  * @param command_string Null-terminated string containing the command.
  */
-void command_parser_process(const uint8_t* command_string);
+void CommandParserProcess(const uint8_t* command_string);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  // COMMAND_PARSER_H_
+#endif  // SRC_COMMAND_PARSER_H_

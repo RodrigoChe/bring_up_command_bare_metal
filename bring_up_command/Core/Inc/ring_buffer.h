@@ -45,7 +45,7 @@ typedef enum {
     kEmpty,                ///< Buffer is empty, operation cannot be performed
     kInvalidArgument,      ///< Invalid parameters passed to function
     kError                 ///< General error occurred
-} ReturnCodes;
+} ReturnCode;
 
 /**
  * @brief Initializes the ring buffer to empty state.
@@ -53,7 +53,7 @@ typedef enum {
  * @param rb Pointer to the RingBuffer instance to initialize.
  * @return kOk if initialization successful, kInvalidArgument if rb is NULL.
  */
-ReturnCodes RingBufferInit(RingBuffer* rb);
+ReturnCode RingBufferInit(RingBuffer* rb);
 
 /**
  * @brief Pushes a single byte into the buffer.
@@ -63,7 +63,7 @@ ReturnCodes RingBufferInit(RingBuffer* rb);
  * @return kOk if push successful, kFull if buffer is full,
  *     kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferPush(RingBuffer* rb, uint8_t data);
+ReturnCode RingBufferPush(RingBuffer* rb, uint8_t data);
 
 /**
  * @brief Pops a single byte from the buffer.
@@ -73,7 +73,7 @@ ReturnCodes RingBufferPush(RingBuffer* rb, uint8_t data);
  * @return kOk if pop successful, kEmpty if buffer is empty,
  *     kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferPop(RingBuffer* rb, uint8_t* data);
+ReturnCode RingBufferPop(RingBuffer* rb, uint8_t* data);
 
 /**
  * @brief Checks if the buffer is empty.
@@ -82,7 +82,7 @@ ReturnCodes RingBufferPop(RingBuffer* rb, uint8_t* data);
  * @return kEmpty if buffer is empty, kOk if buffer
  *     contains data, kInvalidArgument if rb is NULL.
  */
-ReturnCodes RingBufferIsEmpty(const RingBuffer* rb);
+ReturnCode RingBufferIsEmpty(const RingBuffer* rb);
 
 /**
  * @brief Checks if the buffer is full.
@@ -91,14 +91,14 @@ ReturnCodes RingBufferIsEmpty(const RingBuffer* rb);
  * @return kFull if buffer is full, kOk if buffer  has space,
  *     kInvalidArgument if rb is NULL.
  */
-ReturnCodes RingBufferIsFull(const RingBuffer* rb);
+ReturnCode RingBufferIsFull(const RingBuffer* rb);
 
 /**
  * @brief Flushes the buffer, removing all elements and resetting to empty state. *
  * @param rb Pointer to the RingBuffer instance.
  * @return kOk if flush successful, kInvalidArgument  if rb is NULL.
  */
-ReturnCodes RingBufferFlush(RingBuffer* rb);
+ReturnCode RingBufferFlush(RingBuffer* rb);
 
 /**
  * @brief Checks if adding a specified number
@@ -109,7 +109,7 @@ ReturnCodes RingBufferFlush(RingBuffer* rb);
  * @return kOk if buffer would not be full, kFull if buffer would be full,
  *     kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferWillFull(RingBuffer* rb, uint16_t new_items);
+ReturnCode RingBufferWillFull(RingBuffer* rb, uint16_t new_items);
 
 /**
  * @brief Retrieves the number of free items available in the buffer.
@@ -118,7 +118,7 @@ ReturnCodes RingBufferWillFull(RingBuffer* rb, uint16_t new_items);
  * @param free_items Pointer to store the number of free items available.
  * @return kOk if operation successful, kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items);
+ReturnCode RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items);
 
 /**
  * @brief Retrieves the current number of used items in the buffer.
@@ -127,7 +127,7 @@ ReturnCodes RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items);
  * @param num Pointer to store the number of used items.
  * @return kOk if operation successful, kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferCurrentItems(RingBuffer* rb, uint16_t* num);
+ReturnCode RingBufferCurrentItems(RingBuffer* rb, uint16_t* num);
 
 /**
  * @brief Retrieves the current allocated size of the buffer.
@@ -136,7 +136,7 @@ ReturnCodes RingBufferCurrentItems(RingBuffer* rb, uint16_t* num);
  * @param num Pointer to store the buffer size (always RING_BUFFER_SIZE - 1).
  * @return kOk if operation successful, kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferCurrentSize(RingBuffer* rb, uint16_t* num);
+ReturnCode RingBufferCurrentSize(RingBuffer* rb, uint16_t* num);
 
 /**
  * @brief Pushes a stream of data into the buffer.
@@ -147,7 +147,7 @@ ReturnCodes RingBufferCurrentSize(RingBuffer* rb, uint16_t* num);
  * @return kOk if all items pushed successfully, kFull if insufficient space,
  *         kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items);
+ReturnCode RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items);
 
 /**
  * @brief Pops a stream of data from the buffer.
@@ -158,7 +158,7 @@ ReturnCodes RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items);
  * @return kOk if all items popped successfully, kEmpty if insufficient data,
  *         kInvalidArgument if parameters invalid.
  */
-ReturnCodes RingBufferStreamPop(RingBuffer* rb, uint8_t* data, uint16_t items);
+ReturnCode RingBufferStreamPop(RingBuffer* rb, uint8_t* data, uint16_t items);
 
 #ifdef __cplusplus
 }

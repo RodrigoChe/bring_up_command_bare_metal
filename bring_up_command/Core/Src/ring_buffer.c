@@ -9,7 +9,7 @@
 #include <string.h>
 #include <stdbool.h>
 
-ReturnCodes RingBufferInit(RingBuffer* rb) {
+ReturnCode RingBufferInit(RingBuffer* rb) {
   if(rb == NULL) {
 	  /* check your buffer parameter */
 	  return kInvalidArgument;
@@ -22,7 +22,7 @@ ReturnCodes RingBufferInit(RingBuffer* rb) {
   return kOk;
 }
 
-ReturnCodes RingBufferIsFull(const RingBuffer* rb) {
+ReturnCode RingBufferIsFull(const RingBuffer* rb) {
   if(rb == NULL) {
 	  /* check your buffer parameter */
 	  return kInvalidArgument;
@@ -35,7 +35,7 @@ ReturnCodes RingBufferIsFull(const RingBuffer* rb) {
   }
 }
 
-ReturnCodes RingBufferIsEmpty(const RingBuffer* rb) {
+ReturnCode RingBufferIsEmpty(const RingBuffer* rb) {
   if(rb == NULL) {
 	  /* check your buffer parameter */
 	  return kInvalidArgument;
@@ -50,7 +50,7 @@ ReturnCodes RingBufferIsEmpty(const RingBuffer* rb) {
   }
 }
 
-ReturnCodes RingBufferPush(RingBuffer* rb, uint8_t data) {
+ReturnCode RingBufferPush(RingBuffer* rb, uint8_t data) {
   if(rb == NULL) {
 	  /* check your buffer parameter */
 	  return kInvalidArgument;
@@ -86,7 +86,7 @@ ReturnCodes RingBufferPush(RingBuffer* rb, uint8_t data) {
   return kOk;
 }
 
-ReturnCodes RingBufferPop(RingBuffer* rb, uint8_t* data) {
+ReturnCode RingBufferPop(RingBuffer* rb, uint8_t* data) {
   if((rb == NULL) || (data == NULL)) {
 	  // check your buffer and data parameter
 	  return kInvalidArgument;
@@ -109,7 +109,7 @@ ReturnCodes RingBufferPop(RingBuffer* rb, uint8_t* data) {
   return kOk;
 }
 
-ReturnCodes RingBufferFlush(RingBuffer* rb) {
+ReturnCode RingBufferFlush(RingBuffer* rb) {
   if(rb == NULL) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -124,7 +124,7 @@ ReturnCodes RingBufferFlush(RingBuffer* rb) {
   return kOk;
 }
 
-ReturnCodes RingBufferWillFull(RingBuffer* rb, uint16_t new_items) {
+ReturnCode RingBufferWillFull(RingBuffer* rb, uint16_t new_items) {
   if(rb == NULL) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -137,7 +137,7 @@ ReturnCodes RingBufferWillFull(RingBuffer* rb, uint16_t new_items) {
   }
 }
 
-ReturnCodes RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items) {
+ReturnCode RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items) {
   if(rb == NULL) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -148,7 +148,7 @@ ReturnCodes RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items) {
   return kOk;
 }
 
-ReturnCodes RingBufferCurrentItems(RingBuffer* rb, uint16_t* num) {
+ReturnCode RingBufferCurrentItems(RingBuffer* rb, uint16_t* num) {
   if(rb == NULL) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -159,7 +159,7 @@ ReturnCodes RingBufferCurrentItems(RingBuffer* rb, uint16_t* num) {
   return kOk;
 }
 
-ReturnCodes RingBufferCurrentSize(RingBuffer* rb, uint16_t* num){
+ReturnCode RingBufferCurrentSize(RingBuffer* rb, uint16_t* num){
   if(rb == NULL) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -174,7 +174,7 @@ ReturnCodes RingBufferCurrentSize(RingBuffer* rb, uint16_t* num){
   return kOk;
 }
 
-ReturnCodes RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items) {
+ReturnCode RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items) {
   if((rb == NULL) || (data == NULL) || (items >= RING_BUFFER_SIZE)) {
 	  // check your buffer parameter
 	  return kInvalidArgument;
@@ -188,7 +188,7 @@ ReturnCodes RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items) 
     return kFull;
   } else {
 	for(uint16_t i = 0; i < items; i++) {
-	  ReturnCodes result = RingBufferPush(rb, data[i]);
+	  ReturnCode result = RingBufferPush(rb, data[i]);
 	  if(result != kOk) {
 	    return result;
 	  }
@@ -197,7 +197,7 @@ ReturnCodes RingBufferStreamPush(RingBuffer* rb, uint8_t* data, uint16_t items) 
   return kOk;
 }
 
-ReturnCodes RingBufferStreamPop(RingBuffer* rb, uint8_t* data, uint16_t items) {
+ReturnCode RingBufferStreamPop(RingBuffer* rb, uint8_t* data, uint16_t items) {
   if((rb == NULL) || (data == NULL) || (items <= 0)) {
     // check your buffer parameter
     return kInvalidArgument;
@@ -208,7 +208,7 @@ ReturnCodes RingBufferStreamPop(RingBuffer* rb, uint8_t* data, uint16_t items) {
   }
 
   for(uint16_t i = 0; i < items; i++) {
-    ReturnCodes result = RingBufferPop(rb, &data[i]);
+    ReturnCode result = RingBufferPop(rb, &data[i]);
     if(result != kOk) {
       return result;
     }

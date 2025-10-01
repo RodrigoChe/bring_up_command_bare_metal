@@ -60,7 +60,7 @@ static void MX_USART2_UART_Init(void);
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-
+//TODO: add commands using parameters
 #define RX_DMA_BUF_SIZE 128
 uint8_t rx_dma_buf[RX_DMA_BUF_SIZE];
 
@@ -109,7 +109,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t dma_pos)
     }
 }
 
-static void prinTX(const char* str) {
+static void print_tx(const char* str) {
     HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
 /* USER CODE END 0 */
@@ -150,19 +150,19 @@ int main(void)
   const char* msg = "Firmware initializing \r\n";
   /*Commum mode for  TX*/
   //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-  prinTX(msg);
+  print_tx(msg);
 
-  ReturnCodes ret = kError;
+  ReturnCode ret = kError;
 
   ret = RingBufferInit(&ring_buf);
 
   if(ret != kOk) {
 	  msg = "Failed in buffers initialization!\r\n";
       //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-	  prinTX(msg);
+	  print_tx(msg);
   }
 
-  prinTX("Test Console Initialized. \r\n Type 'help'.\r\n");
+  print_tx("Test Console Initialized. \r\n Type 'help'.\r\n");
 
   HAL_UARTEx_ReceiveToIdle_DMA(&huart2, rx_dma_buf, RX_DMA_BUF_SIZE);
 
@@ -175,6 +175,7 @@ int main(void)
     /* USER CODE END WHILE */
 	    /* USER CODE BEGIN 3 */
 	  update_freq++;
+	  //TODO: move to a static function ReceiveCommand()
 	  if(update_freq == 500000){
 	    //HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	    if(RingBufferIsEmpty(&ring_buf) != kEmpty){
@@ -184,10 +185,10 @@ int main(void)
 	      RingBufferStreamPop(&ring_buf, cmd_buf, num_byte);
 
 	      //HAL_UART_Transmit(&huart2, cmd_buf, num_byte, HAL_MAX_DELAY);
-	      prinTX((char*)cmd_buf);
-	      prinTX("\r\n");
+	      print_tx((char*)cmd_buf);
+	      print_tx("\r\n");
 
-	      command_parser_process(cmd_buf); // Processa o comando
+	      CommandParserProcess(cmd_buf); // Processa o comando
 
 	      memset(cmd_buf, '\0', sizeof(cmd_buf));
 	    }
