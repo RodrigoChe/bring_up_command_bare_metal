@@ -119,7 +119,7 @@ ReturnCodes RingBufferFlush(RingBuffer* rb) {
   rb->head = 0;
   rb->tail = 0;
 
-  memset(rb->buffer, 0, sizeof(rb->buffer)); //TODO: maybe conditional
+  memset(rb->buffer, 0, sizeof(rb->buffer));
 
   return kOk;
 }
@@ -143,7 +143,7 @@ ReturnCodes RingBufferFreeItems(RingBuffer* rb, uint16_t* free_items) {
 	  return kInvalidArgument;
   }
 
-  *free_items = (RING_BUFFER_SIZE -1) - rb->items; // plus more 1???
+  *free_items = (RING_BUFFER_SIZE -1) - rb->items;
 
   return kOk;
 }

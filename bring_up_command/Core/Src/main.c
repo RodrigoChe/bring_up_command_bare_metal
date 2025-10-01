@@ -64,8 +64,8 @@ static void MX_USART2_UART_Init(void);
 #define RX_DMA_BUF_SIZE 128
 uint8_t rx_dma_buf[RX_DMA_BUF_SIZE];
 
-#define CMD_BUF_SIZE 128
-char cmd_buf[CMD_BUF_SIZE];
+#define CMD_BUF_SIZE 64
+uint8_t cmd_buf[CMD_BUF_SIZE];
 
 RingBuffer ring_buf;
 
@@ -132,7 +132,6 @@ int main(void)
 
   /* USER CODE BEGIN Init */
   uint16_t num_byte;
-  uint16_t line_pos = 0;
   uint32_t update_freq = 0;
   /* USER CODE END Init */
 
@@ -148,7 +147,7 @@ int main(void)
   MX_DMA_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
-  const char* msg = "Firmware initialing\r\n";
+  const char* msg = "Firmware initializing \r\n";
   /*Commum mode for  TX*/
   //HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
   prinTX(msg);
@@ -179,13 +178,18 @@ int main(void)
 	  if(update_freq == 500000){
 	    //HAL_GPIO_TogglePin(LD2_GPIO_Port, LD2_Pin);
 	    if(RingBufferIsEmpty(&ring_buf) != kEmpty){
+
 	      RingBufferCurrentSize(&ring_buf, &num_byte);
+
 	      RingBufferStreamPop(&ring_buf, cmd_buf, num_byte);
-	      HAL_UART_Transmit(&huart2, cmd_buf, num_byte, HAL_MAX_DELAY);
-//	      for(uint8_t i = 0; i <= num_byte; i++){
-//	      	HAL_UART_Transmit(&huart2, &cmd_buf[i], num_byte, HAL_MAX_DELAY);
-//	      }
+
+	      //HAL_UART_Transmit(&huart2, cmd_buf, num_byte, HAL_MAX_DELAY);
+	      prinTX((char*)cmd_buf);
+	      prinTX("\r\n");
+
 	      command_parser_process(cmd_buf); // Processa o comando
+
+	      memset(cmd_buf, '\0', sizeof(cmd_buf));
 	    }
 	    update_freq = 0;
 	  }
