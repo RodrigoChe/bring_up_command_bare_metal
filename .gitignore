@@ -18,6 +18,8 @@
 Debug/
 debug/
 *Debug
+*Debug.launch
+
 /Debug/
 Release/
 *Release
