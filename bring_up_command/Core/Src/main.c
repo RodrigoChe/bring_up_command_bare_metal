@@ -112,6 +112,7 @@ void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t dma_pos)
 static void print_tx(const char* str) {
     HAL_UART_Transmit(&huart2, (uint8_t*)str, strlen(str), HAL_MAX_DELAY);
 }
+
 /* USER CODE END 0 */
 
 /**

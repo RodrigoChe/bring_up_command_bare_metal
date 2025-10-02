@@ -66,7 +66,7 @@ static void CmdLedOff() {
  */
 static void CmdVersion() {
   char buffer[32];
-  snprintf(buffer, sizeof(buffer), "Firmware v%s\r\n", FW_VERSION);
+  snprintf(buffer, sizeof(buffer), "Firmware V%s\r\n", FW_VERSION);
   ConsolePrint(buffer);
 }
 
